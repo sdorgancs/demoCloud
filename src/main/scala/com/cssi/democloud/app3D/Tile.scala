@@ -51,17 +51,23 @@ case class Tile(product: StereoProduct,
     val y = coordinates.y
     val w = coordinates.w
     val h = coordinates.h
-
+    //compute tile working dir name
     tileDir = getTileDir(x, y, w, h)
+
+    //compute neighbors tiles dir name
     neighborhood.foreach { coord =>
       neighborhoodDirs = neighborhoodDirs ::: List(getTileDir(coord.x, coord.y, coord.w, coord.h))
     }
 
-    val fs = IgniteUtils.getOrStart()
+    //access to IGFS
+    val fs = IgniteUtils.getOrStartFS()
 
+    //Creates pairs dir in IGFS
     for (i <- 1 to product.configuration.images.length) {
       fs.mkdirs(new IgfsPath(new IgfsPath(tileDir), f"pair_$i"))
     }
+
+    //Update tile configuration
     configuration.roi = coordinates.copy()
     configuration.full_img = false
     configuration.neighborhoodDirs = neighborhoodDirs
@@ -78,7 +84,7 @@ case class Tile(product: StereoProduct,
     val img = new BufferedImage(mask.cols, mask.rows, BufferedImage.TYPE_BYTE_GRAY);
     for(x <- 0 to mask.cols)
       for(y <- 0 to mask.cols)
-        img.setRGB(x,y, if(mask(x, y)) 256 else 0)
+        img.setRGB(x,y, if(mask(x, y)) 255 else 0)
     val outPng = fs.create(new IgfsPath(new IgfsPath(tileDir), "cloud_water_image_domain_mask.png"), true)
     //Write image content in a buffer
     val ba = new ByteArrayOutputStream()

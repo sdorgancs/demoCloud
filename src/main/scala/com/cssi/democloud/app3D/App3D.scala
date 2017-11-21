@@ -25,11 +25,15 @@ object App3D {
     //Initialize spark context
     val conf = new SparkConf().setAppName("app3D").setMaster("local")
     sc = SparkContext.getOrCreate(conf)
-    val jsonString = Source.fromFile(productPath).mkString
 
     //Load configurations file
+    val jsonString = Source.fromFile(productPath).mkString
     val product = StereoProduct.fromString(productPath, jsonString)
     cfg = product.configuration
+
+    //Create Tiles and neighborhood coordinates
+    product.createWorkingDir()
+    product.createROIAdjustedTileCoordinates()
 
     //Save tiles into Ignite Cache
     val igniteRdd = IgniteUtils.getContext(sc).fromCache[String, Tile]("tiles")
@@ -88,7 +92,7 @@ object App3D {
           //Computes a point cloud from the disparity maps of N-pairs of image tiles.
           rdd.foreach(e => multiDisparitiesToPly(e._2))
         }
-        else if(cfg.triangulation_mode == "geometric"){
+        else if(cfg.triangulation_mode == "pairwise"){
           //Computes a point cloud from the disparity map of a pair of image tiles.
           rdd.foreach(e => disparityToPly(e._2))
         }

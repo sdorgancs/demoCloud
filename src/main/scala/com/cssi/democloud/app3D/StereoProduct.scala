@@ -29,7 +29,7 @@ class StereoProduct(val configuration: StereoConfiguration, val path: String) {
     * Create working dir in Ignite file system
     */
   def createWorkingDir(): Unit ={
-    val fs = IgniteUtils.getOrStart()
+    val fs = IgniteUtils.getOrStartFS()
     val outDir = new IgfsPath(configuration.out_dir)
     fs.mkdirs(outDir)
   }

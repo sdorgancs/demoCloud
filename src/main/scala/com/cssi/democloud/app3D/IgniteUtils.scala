@@ -14,7 +14,7 @@ object IgniteUtils {
   /**
     * Returns the IGFS object, starts Ignition if needed
     */
-  def getOrStart(): IgniteFileSystem ={
+  def getOrStartFS(): IgniteFileSystem ={
     Ignition.getOrStart(conf).fileSystem("igfs")
   }
 
